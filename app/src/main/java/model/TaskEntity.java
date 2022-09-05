@@ -33,6 +33,10 @@ public class TaskEntity {
         this.updatedAt = updatedAt;
     }
 
+    public TaskEntity() {
+        this.createdAt = new Date();
+    }
+
     public int getId() {
         return id;
     }
