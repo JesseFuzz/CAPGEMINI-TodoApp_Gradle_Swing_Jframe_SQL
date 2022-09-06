@@ -3,17 +3,16 @@ package controller;
 import model.ProjectEntity;
 import util.ConnectionFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectController {
 
-    public void save(){
+    public void save(ProjectEntity project){
         //Criando a query SQL para acontecer dentro do DB. As interrogações serão substituídas com Set do Statement
-        String sql = "INSERT INTO tasks (idProject, name, description, completed, notes, deadline, createdAt, updatedAt)" +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO projects (name, description, createdAt, updatedAt)" +
+                "VALUES (?, ?, ?, ?)";
 
 
         //inicializações relativas ao meu sql:
@@ -24,9 +23,22 @@ public class ProjectController {
         PreparedStatement statement = null;//só inicializei pois precisa ser global
 
         try{
+            //aqui eu crio a minha conexão
+            connection = ConnectionFactory.getConnection();
+            //executo minha query baseado no sql da variável sql acima
+            statement = connection.prepareStatement(sql);
+
+            //seto os meus valores
+            statement.setString(1, project.getName());
+            statement.setString(2, project.getDescription());
+            statement.setDate(3, new Date(project.getCreatedAt().getTime()));
+            statement.setDate(4, new Date(project.getUpdatedAt().getTime()));
+
+            //executo tudo
+            statement.execute();
 
         }catch (SQLException ex){
-            throw new RuntimeException("erro", ex);
+            throw new RuntimeException("erro ao salvar o projeto", ex);
         }finally {
             ConnectionFactory.closeConnection(connection, statement);
         }
@@ -36,16 +48,14 @@ public class ProjectController {
 
 
 
-    public void update(){
+    public void update(ProjectEntity project){
         //criando a query SQL para acontecer dentro do DB. As interrogações serão substituídas com Set do Statement
-        String sql = "UPDATE tasks SET idProject = ?," +
+        String sql = "UPDATE projects SET" +
                 " name = ?," +
                 " description = ?," +
-                " notes = ?," +
-                " deadline = ?," +
-                " completed = ?," +
                 " createdAt = ?," +
-                " updatedAt = ? WHERE id = ?";
+                " updatedAt = ?" +
+                "WHERE id = ?";
 
         //inicializações relativas ao meu sql:
         //interface Connection que eu implementei o método getConnection na minha classe ConnectionFactory.
@@ -55,9 +65,24 @@ public class ProjectController {
         PreparedStatement statement = null;//só inicializei pois precisa ser global
 
         try{
+            //aqui eu crio a minha conexão
+            connection = ConnectionFactory.getConnection();
+            //executo minha query baseado no sql da variável sql acima
+            statement = connection.prepareStatement(sql);
+
+            //seto os meus valores
+            statement.setString(1, project.getName());
+            statement.setString(2, project.getDescription());
+            statement.setDate(3, new Date(project.getCreatedAt().getTime()));
+            statement.setDate(4, new Date(project.getUpdatedAt().getTime()));
+            statement.setInt(5, project.getId());
+
+            //executo tudo
+            statement.execute();
+
 
         }catch (SQLException ex){
-            throw new RuntimeException("erro", ex);
+            throw new RuntimeException("erro ao atualizar o projeto", ex);
         }finally {
             ConnectionFactory.closeConnection(connection, statement);
         }
@@ -68,9 +93,9 @@ public class ProjectController {
 
 
 
-    public void removeById(){
+    public void removeById(int idProject){
         //criando a query SQL para acontecer dentro do DB. As interrogações serão substituídas com Set do Statement
-        String sql = "DELETE FROM tasks WHERE id = ?";
+        String sql = "DELETE FROM projects WHERE id = ?";
 
 
         //inicializações relativas ao meu sql:
@@ -81,9 +106,16 @@ public class ProjectController {
         PreparedStatement statement = null;//só inicializei pois precisa ser global
 
         try{
+            //aqui eu crio a minha conexão
+            connection = ConnectionFactory.getConnection();
+            //executo minha query baseado no sql da variável sql acima
+            statement = connection.prepareStatement(sql);
+            //seto meu parametro que quero mudar (?)
+            statement.setInt(1, idProject);
+            statement.execute(sql);
 
         }catch (SQLException ex){
-            throw new RuntimeException("erro", ex);
+            throw new RuntimeException("erro ao deletar o projeto", ex);
         }finally {
             ConnectionFactory.closeConnection(connection, statement);
         }
@@ -95,7 +127,9 @@ public class ProjectController {
 
     public List<ProjectEntity> getAll(){
         //criando a query SQL para acontecer dentro do DB. As interrogações serão substituídas com Set do Statement
-        String sql = "SELECT * FROM tasks where idProject = ?";
+        String sql = "SELECT * FROM projects";
+
+        List<ProjectEntity> projects = new ArrayList<>();
 
         //inicializações relativas ao meu sql:
         //interface Connection que eu implementei o método getConnection na minha classe ConnectionFactory.
@@ -104,11 +138,36 @@ public class ProjectController {
         //e todos os valores set para as interrogações
         PreparedStatement statement = null;//só inicializei pois precisa ser global
 
+        //interface que vai recuperar os dados do banco de dados (que recebe do banco de dados)
+        //quando eu faço um SELECT eu preciso pegar esse resultado do DB
+        ResultSet resultSet = null; //polimorfismo. Só inicializo
+
         try{
+            //aqui eu crio a minha conexão
+            connection = ConnectionFactory.getConnection();
+            //executo minha query baseado no sql da variável sql acima
+            statement = connection.prepareStatement(sql);
+
+            //me devolve o valor de resposta do SELECT do banco de dados
+            resultSet = statement.executeQuery();
+
+
+            while(resultSet.next()){//enquanto esse meu retorno do resultSet tiver próximo faça:
+                ProjectEntity project = new ProjectEntity();//tive que criar um construtor vazio no ProjectEntity
+
+                project.setId(resultSet.getInt("id"));
+                project.setName(resultSet.getString("name"));
+                project.setDescription(resultSet.getString("description"));
+                project.setCreatedAt(resultSet.getDate("createdAt"));
+                project.setUpdatedAt(resultSet.getDate("updatedAt"));
+
+                projects.add(project);
+            }
 
         }catch (SQLException ex){
-            throw new RuntimeException("erro", ex);
+            throw new RuntimeException("erro ao buscar os projetos", ex);
         }finally {
-            ConnectionFactory.closeConnection(connection, statement);
-        }return null;}
+            ConnectionFactory.closeConnection(connection, statement, resultSet);
+        }return projects;
+    }
 }

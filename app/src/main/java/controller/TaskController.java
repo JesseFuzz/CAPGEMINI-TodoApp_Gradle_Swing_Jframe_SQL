@@ -34,7 +34,7 @@ public class TaskController {
             statement.setDate(8, (java.sql.Date) new Date(task.getUpdatedAt().getTime()));
             statement.execute();
         }catch (SQLException ex){
-            throw new RuntimeException("erro" + ex.getMessage(), ex);
+            throw new RuntimeException("erro ao salvar a tarefa" + ex.getMessage(), ex);
         }finally {//esse bloco sempre será executado ao final da execução do bloco try independente de ocorrer o erro
             ConnectionFactory.closeConnection(connection, statement);//fechando a conexão connection que eu criei lá em cima
 

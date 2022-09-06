@@ -25,6 +25,10 @@ public class ProjectEntity {
         this.updatedAt = updatedAt;
     }
 
+    public ProjectEntity() {
+
+    }
+
     public int getId() {
         return id;
     }
