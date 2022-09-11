@@ -64,7 +64,7 @@ public class MainScreen extends javax.swing.JFrame {
         EmptyListSubtitle.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         EmptyListSubtitle.setForeground(new java.awt.Color(204, 204, 204));
         EmptyListSubtitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        EmptyListSubtitle.setText("Clique no botão \"ADD\" para adicionar uma nova tarefa");
+        EmptyListSubtitle.setText("Clique no botï¿½o \"ADD\" para adicionar uma nova tarefa");
 
         javax.swing.GroupLayout EmptyListLayout = new javax.swing.GroupLayout(EmptyList);
         EmptyList.setLayout(EmptyListLayout);
@@ -226,7 +226,7 @@ public class MainScreen extends javax.swing.JFrame {
                 {null, null, null, null}
             },
             new String [] {
-                "Nome", "Descrição", "Prazo", "Tarefa Concluída"
+                "Nome", "Descriï¿½ï¿½o", "Prazo", "Tarefa Concluï¿½da"
             }
         ) {
             Class[] types = new Class [] {
@@ -302,6 +302,14 @@ public class MainScreen extends javax.swing.JFrame {
         // TODO add your handling code here:
         ProjectDialogScreen projectDialogScreen = new ProjectDialogScreen(this, rootPanelCheckingEnabled);
         projectDialogScreen.setVisible(true);
+
+        taskDialogScreen.addWindowListener(new WindowAdapter() {
+            public void windowClosed(WindowEvent e) {
+                int projectIndex = jListProjects.getSelectedIndex();
+                Project project = (Project) projectsModel.get(projectIndex);
+                loadTasks(project.getId());
+            }
+        });
     }//GEN-LAST:event_ProjectsAddMouseClicked
 
     /**
